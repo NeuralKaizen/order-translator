@@ -1,0 +1,10 @@
+CHANNEL: email
+FROM: flota.transporte@empresa.com
+SUBJECT: pedido grande flota
+---
+Buen dia. Para mantenimiento de flota necesito:
+- 6 filtros de aceite Toyota Corolla 2016
+- 4 baterias para Bajaj Pulsar 2016
+- 10 bujias NGK para CB125
+- 3 kit de cadena y piñon para Pulsar
+Necesito todo esta semana. Es urgente. Cotizar por favor.

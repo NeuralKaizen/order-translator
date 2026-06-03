@@ -1,0 +1,10 @@
+CHANNEL: whatsapp
+FROM: +57 320 555 0477
+ATTACHMENT: pieza_cliente.jpg
+---
+Buenas, me sirven esta? es para una moto. [imagen adjunta]
+
+[IMAGE DESCRIPTION for the challenge — in a real run this would be an actual photo file:
+A small cylindrical metal component with a threaded base, a white ceramic
+insulator, a hex nut, and an electrode gap at the tip. Hand-held, dirty/used.
+There is a faint marking on the metal that reads "NGK CR8E". No vehicle visible.]

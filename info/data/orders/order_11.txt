@@ -1,0 +1,6 @@
+CHANNEL: email
+FROM: maria.r@outlook.com
+SUBJECT: sincronizacion
+---
+Buenas tardes, voy a hacerle la sincronizacion completa al Chevrolet Spark 2015.
+Me arma el pedido con lo que necesito? Gracias.

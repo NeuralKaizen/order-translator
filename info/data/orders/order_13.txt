@@ -1,0 +1,5 @@
+CHANNEL: email
+FROM: repuestos.norte@gmail.com
+SUBJECT: referencia
+---
+Necesito 4 unidades de la referencia 90915-YZZD4. Confirmar disponibilidad y precio.

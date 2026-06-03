@@ -1,0 +1,6 @@
+CHANNEL: email
+FROM: taller.lacalle@gmail.com
+SUBJECT: pedido
+---
+Cordial saludo, para una Renault Duster 2016 necesito pastillas de freno y un
+par de amortiguadores. Quedo atento a la cotizacion.
