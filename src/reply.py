@@ -24,20 +24,30 @@ single short reply that:
 - quotes the matched items with their prices,
 - asks the open clarifying questions naturally (don't dump them as a list),
 - for not-found items, says they're not in the catalog and offers to look for an \
-alternative or special-order them.
+alternative or special-order them,
+- if a matched item is OUT OF STOCK and an alternative is given, tell the customer \
+it's out of stock and offer the suggested alternative with its price.
 
-Never invent prices, parts, or SKUs — use only what you're given. Keep it to a few \
-sentences. Output ONLY the reply text, no preamble."""
+Never invent prices, parts, or SKUs — use only what you're given. Do not mention \
+costs or margins (those are internal). Keep it to a few sentences. Output ONLY the \
+reply text, no preamble."""
 
 
 def _context(order: RawOrder, line_items: list[LineItemResult], questions: list[str]) -> str:
     lines = [f"CHANNEL: {order.channel}", f"CUSTOMER WROTE: {order.body!r}", ""]
     for li in line_items:
         if li.decision == "auto_matched":
-            lines.append(
+            row = (
                 f"[MATCHED] {li.customer_text!r} -> {li.matched_name} "
                 f"({format_cop(li.unit_price)} x{li.quantity} = {format_cop(li.line_total)})"
             )
+            if li.suggested_alternative:
+                alt = li.suggested_alternative
+                row += (
+                    f"  [OUT OF STOCK -> alternative: {alt.name} "
+                    f"({format_cop(alt.price)})]"
+                )
+            lines.append(row)
         elif li.decision == "needs_clarification":
             lines.append(f"[ASK] {li.customer_text!r}: {li.clarifying_question}")
         else:

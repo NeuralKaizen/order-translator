@@ -11,6 +11,8 @@ from pydantic import BaseModel
 
 from .decide import Decision
 from .extract import LineItemIntent
+from .margin import AlternativeSuggestion, is_fluid
+from .margin import unit_cost as estimate_unit_cost
 from .models import Catalog
 
 
@@ -34,21 +36,33 @@ class LineItemResult(BaseModel):
     decision: str  # auto_matched | needs_clarification | not_found
     reasoning: str
     clarifying_question: str | None
+    # hour-5 additions (additive — defaults keep earlier behavior intact)
+    is_fluid: bool = False
+    unit_cost: int | None = None  # estimated COP cost
+    line_margin: int | None = None  # (unit_price - unit_cost) * quantity
+    suggested_alternative: AlternativeSuggestion | None = None
 
 
 def build_line_item(
     intent: LineItemIntent, decision: Decision, catalog: Catalog
 ) -> LineItemResult:
-    """Combine the intent and the decision, pricing the matched SKU from the catalog."""
+    """Combine intent + decision, pricing the matched SKU and estimating its margin."""
     quantity = intent.quantity or 1
     unit_price: int | None = None
     name = decision.matched_name
+    fluid = False
+    cost: int | None = None
+    margin: int | None = None
 
     if decision.matched_sku:
         item = catalog.by_sku.get(decision.matched_sku)
         if item:
             unit_price = item.price
             name = name or item.name
+            fluid = is_fluid(item)
+            cost = estimate_unit_cost(item)
+            if unit_price is not None and cost is not None:
+                margin = (unit_price - cost) * quantity
 
     line_total = unit_price * quantity if unit_price is not None else None
 
@@ -63,6 +77,9 @@ def build_line_item(
         decision=decision.decision,
         reasoning=decision.reasoning,
         clarifying_question=decision.clarifying_question,
+        is_fluid=fluid,
+        unit_cost=cost,
+        line_margin=margin,
     )
 
 

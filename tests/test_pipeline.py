@@ -6,6 +6,8 @@ from types import SimpleNamespace
 from src.decide import Decision
 from src.extract import ExtractedOrder, LineItemIntent, Vehicle
 from src.loader import load_catalog
+from src.margin import AlternativeSuggestion
+from src.models import StockStatus
 from src.pipeline import process_order
 
 ORDER_03 = Path(__file__).resolve().parents[1] / "info" / "data" / "orders" / "order_03.txt"
@@ -83,6 +85,38 @@ def test_process_order_assembles_structured_output():
     assert result.questions_for_customer == ["¿Los amortiguadores son delanteros o traseros?"]
     assert result.quote_total_partial == CATALOG.by_sku[MATCHED_SKU].price
     assert result.customer_reply_draft == "Hola, ya te cotizo."
+
+
+def test_hour5_margin_and_alternative_for_out_of_stock():
+    fake_index = SimpleNamespace(catalog=CATALOG)
+    oos = next(
+        i for i in CATALOG.items
+        if i.stock_status == StockStatus.OUT_OF_STOCK and i.price
+    )
+    fake_alt = AlternativeSuggestion(sku="ALT-1", name="alt", price=1000, reason="r")
+
+    def fake_extract(order):
+        return ExtractedOrder(intents=[_intent("algo", "some part", 1)])
+
+    def fake_resolve(intent):
+        return Decision(
+            matched_sku=oos.sku, matched_name=oos.name, confidence=0.9,
+            decision="auto_matched", reasoning="r",
+            clarifying_question=None, question_stage=None,
+        )
+
+    result = process_order(
+        ORDER_03, fake_index,
+        extract_fn=fake_extract,
+        resolve_fn=fake_resolve,
+        reply_fn=lambda order, lines, qs: "ok",
+        alternative_fn=lambda item: fake_alt,
+    )
+    li = result.line_items[0]
+    assert li.suggested_alternative == fake_alt  # out of stock -> alternative attached
+    assert li.unit_cost is not None
+    assert li.line_margin == li.line_total - li.unit_cost  # qty 1
+    assert result.estimated_margin_total == li.line_margin
 
 
 def test_structured_order_serializes_to_json():
